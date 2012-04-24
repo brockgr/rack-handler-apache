@@ -1,7 +1,11 @@
 require "phusion_passenger"
+require "ttyname"
 
 module Rack
   module Handler
+
+    register 'apache', 'Rack::Handler::Apache'
+
     class Apache
 
       def self.valid_options
@@ -35,7 +39,7 @@ module Rack
           User #{Etc.getlogin}
           Listen #{@port}
           PidFile #{@pid_file}
-          ErrorLog #{@root}/log/rack-helper-apache_error.log
+          ErrorLog #{$stdout.ttyname}
           LockFile #{@root}/tmp/rack-helper-apache.lock
           ServerName localhost
           <VirtualHost *:#{@port}>
@@ -58,7 +62,7 @@ module Rack
           EOD
         end
 
-
+        ::Dir.mkdir("tmp") unless ::Dir.exists? "tmp"
 
         kill_httpd()
         ::File.open(@conf_file, 'w') { |f| f.write(config) }
