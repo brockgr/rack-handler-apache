@@ -12,6 +12,9 @@ module Rack
         {
           "Port=PORT" => "Port to listen on (default: 8080)",
           #TODO#"Host=HOST" => "Hostname to listen on (default: localhost)",
+          "SSLEnable=BOOL" => "Enable https"
+          "SSLCertificateFile=FILENAME" => "SSL Certificate file name",
+          "SSLPrivateKeyFile=FILENAME" => "SSL Private Key file name"
         }
       end
 

@@ -28,12 +28,30 @@ Yes, this is running as you, so there are the usual security issues!
 But it might be handy!!
 
 
-Things to document:
+Configuration Options
+---------------------
 
-* Everything!
-* Default configurations
-* How SSL support works
+* Port
 
-Things todo:
+  Port defaults to 8080
 
-* Better config customisation
+* SSLEnable
+
+  Boolean to enable use of SSL. Deafult is false.
+  If SSL is enables, then SSLCertificateFile and SSLPrivateKeyFile
+  must be set.
+
+* SSLCertificateFile
+
+  The SSL Certificate file name. (Note this is the file name, not a 
+  certificate object, like in Webricks SSLCertificate)
+
+* SSLPrivateKeyFile
+
+  The SSL Private Key file name. (Again this is not the key object)
+
+
+Things todo
+-----------
+
+* Better config customisation - if anyone needs it
