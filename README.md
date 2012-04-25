@@ -18,7 +18,7 @@ or
 
     rackup -s apache config.ru
 
-This will run a minimally configures apached instance as the current user. When you control-c your app,
+This will run a minimally configured Apache instance as the current user. When you control-c your app,
 the server will shutdown too.
 
 Yes, this is not the right way to run your production rails apps!
