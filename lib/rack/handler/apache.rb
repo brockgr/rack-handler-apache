@@ -10,26 +10,32 @@ module Rack
 
       def self.valid_options
         {
-          "Port=PORT" => "Port to listen on (default: 8080)",
-          #TODO#"Host=HOST" => "Hostname to listen on (default: localhost)",
-          "SSLEnable=BOOL" => "Enable https"
+          "Port=PORT"                   => "Port to listen on (default: 8080)",
+          "Host=HOST"                   => "Hostname to listen on (default: 127.0.0.1)",
+          "SSLEnable=BOOL"              => "Enable https",
           "SSLCertificateFile=FILENAME" => "SSL Certificate file name",
-          "SSLPrivateKeyFile=FILENAME" => "SSL Private Key file name"
+          "SSLPrivateKeyFile=FILENAME"  => "SSL Private Key file name",
+          "ServerConfig=TEXT"           => "Additional httpd.conf lines for server",
+          "HostConfig=TEXT"             => "Additional httpd.conf lines for virtual host"
         }
       end
 
       def self.run(app, options={})
 
         unless ::File.exists? ::PhusionPassenger::APACHE2_MODULE
-          puts "Passenger apache module missing, did you run passenger-install-apache2-module?"
+          puts "Fatal: Passenger apache module missing, did you run passenger-install-apache2-module?"
           exit
         end
 
         @root      = ::Dir.pwd
         @port      = options[:Port] || 8080
+        @host      = options[:Host] || '127.0.0.1'
         @pid_file  = "#{@root}/tmp/rack-helper-apache.pid"
         @conf_file = "#{@root}/tmp/httpd.conf"
-        @passenger = `bundle exec passenger-install-apache2-module --snippet`
+
+        # Find the right passenger-install-apache2-module to get the config snipper
+        piam = ::File.expand_path("../../bin/passenger-install-apache2-module", $".find {|f|f=~/phusion_passenger.rb$/})
+        @passenger = `#{piam} --snippet`
 
         puts "Warning: Please use SSLCertificateFile, not SSLCertificate" if
           options[:SSLCertificate] && !options[:SSLCertificateFile]
@@ -40,7 +46,7 @@ module Rack
         config = <<-EOD.gsub(/^ {10}/, '')
           #{@passenger}
           User #{Etc.getlogin}
-          Listen #{@port}
+          Listen #{@host}:#{@port}
           PidFile #{@pid_file}
           ErrorLog #{$stdout.ttyname}
           LockFile #{@root}/tmp/rack-helper-apache.lock
@@ -53,7 +59,9 @@ module Rack
               AllowOverride all
               Options -MultiViews
             </Directory>
+            #{options[:HostConfig]}
           </VirtualHost>
+          #{options[:ServerConfig]}
         EOD
 
         if options[:SSLEnable]
@@ -76,6 +84,7 @@ module Rack
 
         if is_running?
           puts "...started [pid:#{get_pid}]"
+          puts "Available at #{options[:SSLEnable]?'https':'http'}://#{@host}:#{@port}"
           sleep 0.5 while is_running?
           puts "Apache terminated."
         else
@@ -120,7 +129,7 @@ module Rack
       def self.is_running?
         if pid=get_pid
           begin
-            ::Process.kill 0, pid
+            ::Process.kill 0, pid # 0 => check if process exists
             return true
           rescue Errno::ESRCH => e
           end

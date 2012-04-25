@@ -35,6 +35,10 @@ Configuration Options
 
   Port defaults to 8080
 
+* Host
+
+  Interface to listen on. Default is 127.0.0.1.
+
 * SSLEnable
 
   Boolean to enable use of SSL. Deafult is false.
@@ -49,6 +53,14 @@ Configuration Options
 * SSLPrivateKeyFile
 
   The SSL Private Key file name. (Again this is not the key object)
+
+* ServerConfig
+
+  Additional httpd.conf lines for server.
+
+* HostConfig
+
+  Additional httpd.conf lines for <VirtualHost> section.
 
 
 Things todo
